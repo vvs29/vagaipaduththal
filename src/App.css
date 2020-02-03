@@ -2,6 +2,11 @@
   text-align: center;
 }
 
+html, body {
+    margin: 0;
+    padding: 0;
+}
+
 .App-logo {
   height: 40vmin;
   pointer-events: none;
@@ -26,6 +31,21 @@
 
 .App-link {
   color: #61dafb;
+}
+
+.AppHeader {
+    padding: 0.5%;
+    background-color: black;
+    color:white;
+}
+
+.ProfileButton {
+    margin-left: 1em;
+    margin-right: 1em;
+}
+
+.ClearFloat {
+    clear: both;
 }
 
 @keyframes App-logo-spin {

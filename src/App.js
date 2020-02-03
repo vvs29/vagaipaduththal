@@ -5,22 +5,35 @@ import './App.css';
 function App() {
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+        <AppHeader />
     </div>
   );
 }
+
+function getTimestamp() {
+    var today = new Date();
+    var date = today.getFullYear()+'-'+(today.getMonth()+1)+'-'+today.getDate();
+    return date;
+}
+
+class AppHeader extends React.Component {
+  render() {
+    return (
+      <div className="AppHeader">
+        <img src={logo} style={{float: "left", width: "5em"}} />
+        <div style={{float:"right"}}>
+            <span className="ProfileButton">Guest</span>
+            <span>{getTimestamp()}</span>
+        </div>
+        <div className="ClearFloat"></div>
+      </div>
+    );
+  }
+}
+
+class AppBody extends React.Component {
+
+}
+
 
 export default App;
