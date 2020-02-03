@@ -34,9 +34,12 @@ html, body {
 }
 
 .AppHeader {
-    padding: 0.5%;
+    padding: 0.5% 2%;
     background-color: black;
     color:white;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 
 .ProfileButton {

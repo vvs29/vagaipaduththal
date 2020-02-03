@@ -1,3 +1,4 @@
+import React from 'react';
 
 class InputString extends React.Component {
 
