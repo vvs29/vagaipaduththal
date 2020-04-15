@@ -30,6 +30,10 @@ class Classifier extends React.Component {
 
     }
 
+    handleSave = e => {
+        this.setState({selectedmid: e})
+    }
+
     render() {
         // save button
         // add pagination
@@ -44,9 +48,12 @@ class Classifier extends React.Component {
                 <div style={{marginTop:2 + "em"}} />
                 <Container>
                     <Row>
-                        <Col xs={12} md={6}><Suggestions inputString={activeInput} /></Col>
+                        <Col xs={12} md={6}><Suggestions inputString={activeInput} callback={this.handleSave}/></Col>
                         <Col xs={12} md={6}><CreateMember/></Col>
                     </Row>
+                    {(this.state.selectedmid !== undefined) ? <Row>Selected: {this.state.selectedmid}</Row> : ""
+
+                    }
                 </Container>
 
             </div>
