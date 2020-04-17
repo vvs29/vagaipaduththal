@@ -1,0 +1,23 @@
+{
+  "files": {
+    "main.css": "/vagaipaduththal/static/css/main.7a69232a.chunk.css",
+    "main.js": "/vagaipaduththal/static/js/main.838d1230.chunk.js",
+    "main.js.map": "/vagaipaduththal/static/js/main.838d1230.chunk.js.map",
+    "runtime-main.js": "/vagaipaduththal/static/js/runtime-main.4d1deaa5.js",
+    "runtime-main.js.map": "/vagaipaduththal/static/js/runtime-main.4d1deaa5.js.map",
+    "static/js/2.ad64474e.chunk.js": "/vagaipaduththal/static/js/2.ad64474e.chunk.js",
+    "static/js/2.ad64474e.chunk.js.map": "/vagaipaduththal/static/js/2.ad64474e.chunk.js.map",
+    "index.html": "/vagaipaduththal/index.html",
+    "precache-manifest.81954b262abab1c067da3e80e5aafe15.js": "/vagaipaduththal/precache-manifest.81954b262abab1c067da3e80e5aafe15.js",
+    "service-worker.js": "/vagaipaduththal/service-worker.js",
+    "static/css/main.7a69232a.chunk.css.map": "/vagaipaduththal/static/css/main.7a69232a.chunk.css.map",
+    "static/js/2.ad64474e.chunk.js.LICENSE.txt": "/vagaipaduththal/static/js/2.ad64474e.chunk.js.LICENSE.txt",
+    "static/media/logo.svg": "/vagaipaduththal/static/media/logo.5d5d9eef.svg"
+  },
+  "entrypoints": [
+    "static/js/runtime-main.4d1deaa5.js",
+    "static/js/2.ad64474e.chunk.js",
+    "static/css/main.7a69232a.chunk.css",
+    "static/js/main.838d1230.chunk.js"
+  ]
+}
