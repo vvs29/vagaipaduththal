@@ -3,7 +3,7 @@ import Pagination from 'react-bootstrap/Pagination'
 import Container from 'react-bootstrap/Container'
 import Row from 'react-bootstrap/Row'
 import Col from 'react-bootstrap/Col'
-import Button from 'react-bootstrap/Button'
+import Card from 'react-bootstrap/Card'
 import CreateMember from './CreateMember'
 import Suggestions from './Suggestions'
 
@@ -14,7 +14,12 @@ class InputString extends React.Component {
 
     render() {
         return (
-            <Button variant="outline-secondary">{this.props.value}</Button>
+            <Card bg="light" style={{display:"inline-block"}}>
+                <Card.Body>
+                    <Card.Title>{this.props.value}</Card.Title>
+                </Card.Body>
+            </Card>
+            //<Button variant="outline-secondary">{this.props.value}</Button>
         );
     }
 }
