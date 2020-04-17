@@ -10,7 +10,6 @@ class CreateMember extends React.Component {
 
     handleSubmit(e) {
         e.preventDefault();
-        console.log('Event: Form Submit');
     };
 
     render() {
