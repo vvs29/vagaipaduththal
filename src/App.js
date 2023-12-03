@@ -52,11 +52,43 @@ class AppBody extends React.Component {
         "UPI/815219810812/June/kmadhuraganesh@/HDFC BANK L"];
         return inputStrings
     }
+    state = {
+        fileInputStrings: null,
+    };
+ 
+    readAsTextFile = (file) => {
+        return new Promise((resolve, reject) => {
+            var r = new FileReader();
+            r.onload = function(e) { 
+                resolve(e.target.result);
+            }
+            r.onerror = reject;
+            r.readAsText(file);
+        })
+    };
+
+    onFileChange = (event) => {
+        this.readAsTextFile(event.target.files[0])
+        .then((fileContents) => {
+            this.setState({ fileInputStrings: fileContents })
+        })
+        .catch((error) => {
+            console.error(error)
+        })
+    };
 
     render() {
 
         return (
-           <Classifier inputStrings={this.getInputStrings()}/>
+            <div><input
+                type="file"
+                onChange={this.onFileChange}
+            />
+            <button onClick={this.onFileUpload}>
+                Submit
+            </button>
+            {console.log(this.state.fileInputStrings)}</div>
+        //    <Classifier inputStrings={this.getInputStrings()}/>
         );
     }
 }
