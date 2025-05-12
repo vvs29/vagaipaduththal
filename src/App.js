@@ -56,6 +56,7 @@ class AppBody extends React.Component {
     state = {
         fileInputStrings: null,
         taggedData : null,
+        members: null
     };
  
     readAsTextFile = (file) => {
@@ -84,8 +85,18 @@ class AppBody extends React.Component {
             csv: this.state.fileInputStrings,
           })
           .then((response) => {
+
             console.log("suggResp:" + JSON.stringify(response));
-            this.setState({taggedData : response.data});
+            let suggestionResp = response.data;
+            axios.get('http://localhost:8081/user')
+            .then((response) => {
+              console.log("getMemberResp:" + JSON.stringify(response));
+              this.setState({members : response.data, taggedData: suggestionResp});
+            })
+            .catch((error) => {
+              console.log("getMemberErr:" + error);
+            });
+
           })
           .catch((error) => {
             console.log("suggErr:" + error);
@@ -95,16 +106,23 @@ class AppBody extends React.Component {
     render() {
 
         return (
-            <div><input
+            <div>
+                <input
                 type="file"
                 onChange={this.onFileChange}
-            />
-            <button onClick={this.onFileUpload}>
-                Submit
-            </button>
-            {console.log(this.state.fileInputStrings)}
-            {(this.state.taggedData != null) ?
-           <Classifier inputStrings={Object.keys(this.state.taggedData)} taggedData={this.state.taggedData}/> : <div></div>}</div>
+                />
+                <button onClick={this.onFileUpload}>
+                    Submit
+                </button>
+                {console.log(this.state.fileInputStrings)}
+                {(this.state.taggedData != null) ?
+                    <Classifier
+                            inputStrings={Object.keys(this.state.taggedData)}
+                            taggedData={this.state.taggedData}
+                            members={this.state.members}
+                    /> 
+                : <div></div>}
+            </div>
         );
     }
 }

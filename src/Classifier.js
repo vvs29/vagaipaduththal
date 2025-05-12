@@ -95,6 +95,7 @@ class Classifier extends React.Component {
                     <Row>
                         <Col xs={12} md={6}><Suggestions inputString={this.activeInput}
                                                          taggedData={this.props.taggedData}
+                                                         members={this.props.members}
                                                          callback={this.handleSave}/></Col>
                         <Col xs={12} md={6}><CreateMember/></Col>
                     </Row>

@@ -24,16 +24,9 @@ class SuggestedMember extends React.Component {
 }
 
 class Suggestions extends React.Component {
-    getMemberInfo() {
-        return memberInfoJSON;
-    }
-
     getSuggestions(inputString, memberInfo) {
         var suggestionInfos = this.props.taggedData[inputString];
         var suggestedMemberInfos = [];
-        // suggestionInfos.map((memID, i) => {
-        //     suggestedMemberInfos.push(memberInfo[memID])
-        // });
         if (suggestionInfos) {
             suggestedMemberInfos.push(suggestionInfos);
         }
@@ -51,7 +44,7 @@ class Suggestions extends React.Component {
         // TODO: [UI nicety] if selected from dropdown add this to the list of radio buttons and select it
         // TODO: sort items in dropdown alphabetically
         // TODO: typing should search all fields (name, nickname, id, email)
-        this.memberList = this.getMemberInfo();
+        this.memberList = this.props.members;
 
         // converting to array so I can use the map function
         this.memberListArray = [];
@@ -65,7 +58,7 @@ class Suggestions extends React.Component {
         var suggestedMembers = this.getSuggestions(this.props.inputString, this.memberList);
         return (
             <div>
-                {suggestedMembers.map((member, i) => <SuggestedMember key={i} memberInfo={member}
+                {suggestedMembers.map((member, i) => <SuggestedMember key={i} memberInfo={this.props.members[member.mid]}
                                                                       callback={this.props.callback}/>)}
                 <Form.Control as="select" onChange={this.handleSelect}>
                     {this.memberListArray.map((memberInfo, i) => <option>{MemberInfo.getMemberInfoAsString(memberInfo)}</option>)}
