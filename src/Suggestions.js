@@ -4,6 +4,13 @@ import Form from 'react-bootstrap/Form'
 var MemberInfo = require("./MemberInfo");
 
 class SuggestedMember extends React.Component {
+    componentDidMount() {
+        // Call the callback when component mounts if this is the first suggestion
+        if (this.props.isFirst) {
+            this.props.callback(this.props.memberInfo);
+        }
+    }
+
     handleRadioSelect = e => {
         this.props.callback(this.props.memberInfo);
     }
@@ -14,8 +21,13 @@ class SuggestedMember extends React.Component {
         return (
             // TODO: [UI] Show a button instead of this with hover animation and all
             <div style={{ border: 1 + "px solid", padding: 0.5 + "em", borderRadius: 1 + "em", marginBottom: 1 + "em" }}>
-                <Form.Check type="radio" name="memberSelection1" id={"selectionid-" + memberInfo.mid} label={labelText}
-                    onChange={this.handleRadioSelect} />
+                <Form.Check 
+                    type="radio" 
+                    name="memberSelection1" 
+                    id={"selectionid-" + memberInfo.mid} 
+                    label={labelText}
+                    onChange={this.handleRadioSelect} 
+                    defaultChecked={this.props.isFirst} />
             </div>
         );
     }
@@ -56,10 +68,17 @@ class Suggestions extends React.Component {
         var suggestedMembers = this.getSuggestions(this.props.inputString, this.memberList);
         return (
             <div>
-                {suggestedMembers.map((member, i) => <SuggestedMember key={i} memberInfo={this.props.members[member.mid]}
-                    callback={this.props.callback} />)}
+                {suggestedMembers.map((member, i) => {
+                    return member.mid ? 
+                     <SuggestedMember 
+                        key={i} 
+                        memberInfo={this.props.members[member.mid]}
+                        callback={this.props.callback} 
+                        isFirst={i === 0} />
+                        :""
+                    })}
                 <Form.Control as="select" onChange={this.handleSelect}>
-                    {this.memberListArray.map((memberInfo, i) => <option>{MemberInfo.getMemberInfoAsString(memberInfo)}</option>)}
+                    {this.memberListArray.map((memberInfo, i) => <option> key={"selmem" + i} {MemberInfo.getMemberInfoAsString(memberInfo)}</option>)}
                 </Form.Control>
             </div>
         );
