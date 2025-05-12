@@ -29,11 +29,14 @@ class Suggestions extends React.Component {
     }
 
     getSuggestions(inputString, memberInfo) {
-        var suggestionInfos = suggestionsJSON[inputString];
+        var suggestionInfos = this.props.taggedData[inputString];
         var suggestedMemberInfos = [];
-        suggestionInfos.map((memID, i) => {
-            suggestedMemberInfos.push(memberInfo[memID])
-        });
+        // suggestionInfos.map((memID, i) => {
+        //     suggestedMemberInfos.push(memberInfo[memID])
+        // });
+        if (suggestionInfos) {
+            suggestedMemberInfos.push(suggestionInfos);
+        }
         return suggestedMemberInfos;
     }
 

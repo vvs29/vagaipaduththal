@@ -5,6 +5,7 @@ import Classifier from './Classifier';
 import Navbar from 'react-bootstrap/Navbar';
 import Nav from 'react-bootstrap/Nav';
 import NavDropdown from 'react-bootstrap/NavDropdown';
+import axios from "axios";
 
 function App() {
   return (
@@ -54,6 +55,7 @@ class AppBody extends React.Component {
     }
     state = {
         fileInputStrings: null,
+        taggedData : null,
     };
  
     readAsTextFile = (file) => {
@@ -77,6 +79,19 @@ class AppBody extends React.Component {
         })
     };
 
+    onFileUpload = () => {
+        axios.post('http://localhost:8081/api/suggestions', {
+            csv: this.state.fileInputStrings,
+          })
+          .then((response) => {
+            console.log("suggResp:" + JSON.stringify(response));
+            this.setState({taggedData : response.data});
+          })
+          .catch((error) => {
+            console.log("suggErr:" + error);
+          });
+    }
+
     render() {
 
         return (
@@ -87,8 +102,9 @@ class AppBody extends React.Component {
             <button onClick={this.onFileUpload}>
                 Submit
             </button>
-            {console.log(this.state.fileInputStrings)}</div>
-        //    <Classifier inputStrings={this.getInputStrings()}/>
+            {console.log(this.state.fileInputStrings)}
+            {(this.state.taggedData != null) ?
+           <Classifier inputStrings={Object.keys(this.state.taggedData)} taggedData={this.state.taggedData}/> : <div></div>}</div>
         );
     }
 }
