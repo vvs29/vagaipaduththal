@@ -1,7 +1,5 @@
 import React from 'react';
 import Form from 'react-bootstrap/Form'
-import memberInfoJSON from './res/memberInfo.json';
-import suggestionsJSON from './res/mappings.json';
 
 var MemberInfo = require("./MemberInfo");
 
@@ -15,9 +13,9 @@ class SuggestedMember extends React.Component {
         var labelText = MemberInfo.getMemberInfoAsString(memberInfo);
         return (
             // TODO: [UI] Show a button instead of this with hover animation and all
-            <div style={{border: 1 + "px solid", padding: 0.5 + "em", borderRadius: 1 + "em", marginBottom: 1 + "em"}}>
+            <div style={{ border: 1 + "px solid", padding: 0.5 + "em", borderRadius: 1 + "em", marginBottom: 1 + "em" }}>
                 <Form.Check type="radio" name="memberSelection1" id={"selectionid-" + memberInfo.mid} label={labelText}
-                            onChange={this.handleRadioSelect}/>
+                    onChange={this.handleRadioSelect} />
             </div>
         );
     }
@@ -59,7 +57,7 @@ class Suggestions extends React.Component {
         return (
             <div>
                 {suggestedMembers.map((member, i) => <SuggestedMember key={i} memberInfo={this.props.members[member.mid]}
-                                                                      callback={this.props.callback}/>)}
+                    callback={this.props.callback} />)}
                 <Form.Control as="select" onChange={this.handleSelect}>
                     {this.memberListArray.map((memberInfo, i) => <option>{MemberInfo.getMemberInfoAsString(memberInfo)}</option>)}
                 </Form.Control>

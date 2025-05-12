@@ -8,61 +8,61 @@ import NavDropdown from 'react-bootstrap/NavDropdown';
 import axios from "axios";
 
 function App() {
-  return (
-    <div className="App">
-        <AppHeader />
-        <AppBody />
-    </div>
-  );
+    return (
+        <div className="App">
+            <AppHeader />
+            <AppBody />
+        </div>
+    );
 }
 
-function getTimestamp() {
-    var today = new Date();
-    var date = today.getFullYear()+'-'+(today.getMonth()+1)+'-'+today.getDate();
-    return date;
-}
+// function getTimestamp() {
+//     var today = new Date();
+//     var date = today.getFullYear()+'-'+(today.getMonth()+1)+'-'+today.getDate();
+//     return date;
+// }
 
 class AppHeader extends React.Component {
-  render() {
-    return (
-        <Navbar bg="light" expand="lg">
-            <Navbar.Brand href="#home">
-                <img src={logo} alt="" style={{width:'5em'}} />
-                Vagaipaduththal
-            </Navbar.Brand>
-            <Navbar.Toggle aria-controls="basic-navbar-nav" />
-            <Navbar.Collapse id="basic-navbar-nav" >
-                <Nav className="mr-auto">
-                    <Nav.Link href="https://www.imaigal.org/">Imaigal</Nav.Link>
-                </Nav>
-                <Nav>
-                    <NavDropdown title="Guest" id="basic-nav-dropdown">
-                        <NavDropdown.Item href="#">Sign In</NavDropdown.Item>
-                    </NavDropdown>
-                </Nav>
-            </Navbar.Collapse>
-        </Navbar>
-    );
-  }
+    render() {
+        return (
+            <Navbar bg="light" expand="lg">
+                <Navbar.Brand href="#home">
+                    <img src={logo} alt="" style={{ width: '5em' }} />
+                    Vagaipaduththal
+                </Navbar.Brand>
+                <Navbar.Toggle aria-controls="basic-navbar-nav" />
+                <Navbar.Collapse id="basic-navbar-nav" >
+                    <Nav className="mr-auto">
+                        <Nav.Link href="https://www.imaigal.org/">Imaigal</Nav.Link>
+                    </Nav>
+                    <Nav>
+                        <NavDropdown title="Guest" id="basic-nav-dropdown">
+                            <NavDropdown.Item href="#">Sign In</NavDropdown.Item>
+                        </NavDropdown>
+                    </Nav>
+                </Navbar.Collapse>
+            </Navbar>
+        );
+    }
 }
 
 class AppBody extends React.Component {
     getInputStrings() {
         var inputStrings = ["BIL/001462403187/Imaigal_Kavimuthu/NSP", "BIL/001462423482/VenkatAmaz-Imgl/NSP",
             "INF/020557394501/RSUP005 Rice Annai Il", "NEFT-SBIN518152086947-Miss  ANEETHA  M-/ATTN//INB",
-        "UPI/815219810812/June/kmadhuraganesh@/HDFC BANK L"];
+            "UPI/815219810812/June/kmadhuraganesh@/HDFC BANK L"];
         return inputStrings
     }
     state = {
         fileInputStrings: null,
-        taggedData : null,
+        taggedData: null,
         members: null
     };
- 
+
     readAsTextFile = (file) => {
         return new Promise((resolve, reject) => {
             var r = new FileReader();
-            r.onload = function(e) { 
+            r.onload = function (e) {
                 resolve(e.target.result);
             }
             r.onerror = reject;
@@ -72,35 +72,35 @@ class AppBody extends React.Component {
 
     onFileChange = (event) => {
         this.readAsTextFile(event.target.files[0])
-        .then((fileContents) => {
-            this.setState({ fileInputStrings: fileContents })
-        })
-        .catch((error) => {
-            console.error(error)
-        })
+            .then((fileContents) => {
+                this.setState({ fileInputStrings: fileContents })
+            })
+            .catch((error) => {
+                console.error(error)
+            })
     };
 
     onFileUpload = () => {
         axios.post('http://localhost:8081/api/suggestions', {
             csv: this.state.fileInputStrings,
-          })
-          .then((response) => {
-
-            console.log("suggResp:" + JSON.stringify(response));
-            let suggestionResp = response.data;
-            axios.get('http://localhost:8081/user')
+        })
             .then((response) => {
-              console.log("getMemberResp:" + JSON.stringify(response));
-              this.setState({members : response.data, taggedData: suggestionResp});
+
+                console.log("suggResp:" + JSON.stringify(response));
+                let suggestionResp = response.data;
+                axios.get('http://localhost:8081/user')
+                    .then((response) => {
+                        console.log("getMemberResp:" + JSON.stringify(response));
+                        this.setState({ members: response.data, taggedData: suggestionResp });
+                    })
+                    .catch((error) => {
+                        console.log("getMemberErr:" + error);
+                    });
+
             })
             .catch((error) => {
-              console.log("getMemberErr:" + error);
+                console.log("suggErr:" + error);
             });
-
-          })
-          .catch((error) => {
-            console.log("suggErr:" + error);
-          });
     }
 
     render() {
@@ -108,8 +108,8 @@ class AppBody extends React.Component {
         return (
             <div>
                 <input
-                type="file"
-                onChange={this.onFileChange}
+                    type="file"
+                    onChange={this.onFileChange}
                 />
                 <button onClick={this.onFileUpload}>
                     Submit
@@ -117,11 +117,11 @@ class AppBody extends React.Component {
                 {console.log(this.state.fileInputStrings)}
                 {(this.state.taggedData != null) ?
                     <Classifier
-                            inputStrings={Object.keys(this.state.taggedData)}
-                            taggedData={this.state.taggedData}
-                            members={this.state.members}
-                    /> 
-                : <div></div>}
+                        inputStrings={Object.keys(this.state.taggedData)}
+                        taggedData={this.state.taggedData}
+                        members={this.state.members}
+                    />
+                    : <div></div>}
             </div>
         );
     }
