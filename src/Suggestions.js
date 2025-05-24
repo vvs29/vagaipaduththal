@@ -5,7 +5,7 @@ var MemberInfo = require("./MemberInfo");
 
 class SuggestedMember extends React.Component {
     handleRadioSelect = e => {
-        this.props.callback(this.props.memberInfo);
+        this.props.selectionCallback(this.props.memberInfo);
     }
 
     render() {
@@ -40,7 +40,7 @@ class Suggestions extends React.Component {
         this.setState({ suggestedMembers });
         
         if (suggestedMembers.length > 0 && suggestedMembers[0].mid && this.props.members[suggestedMembers[0].mid]) {
-            this.props.callback(this.props.members[suggestedMembers[0].mid]);
+            this.props.selectionCallback(this.props.members[suggestedMembers[0].mid]);
         }
     }
 
@@ -62,11 +62,6 @@ class Suggestions extends React.Component {
         if (suggestionInfos && suggestionInfos.mid !== "na") {
             suggestedMemberInfos.push(suggestionInfos);
         }
-        // if (suggestionInfos) {
-        //     // Filter out any items with mid equal to "na"
-        //     var filteredInfos = suggestionInfos.filter(info => info.mid !== "na");
-        //     suggestedMemberInfos = suggestedMemberInfos.concat(filteredInfos);
-        // }
         return suggestedMemberInfos;
     }
 
@@ -74,7 +69,7 @@ class Suggestions extends React.Component {
     // see SuggestedMember's handleRadioSelect. this binds the method with the class.
     // we may also call .bind(this) like below
     handleSelect = function (e) {
-        this.props.callback(this.memberList[e.target.selectedIndex + 1]);
+        this.props.selectionCallback(this.memberList[e.target.selectedIndex + 1]);
     }.bind(this);
 
     render() {
@@ -99,7 +94,7 @@ class Suggestions extends React.Component {
                      <SuggestedMember 
                         key={i} 
                         memberInfo={this.props.members[member.mid]}
-                        callback={this.props.callback} 
+                        selectionCallback={this.props.selectionCallback} 
                         isFirst={i === 0} />
                         :""
                     })}

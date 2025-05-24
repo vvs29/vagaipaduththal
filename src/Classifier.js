@@ -27,9 +27,9 @@ class InputString extends React.Component {
 class Classifier extends React.Component {
     constructor(props) {
         super(props)
-        this.state = { 
-            activePage: 1, 
-            selectedmid: [], 
+        this.state = {
+            activePage: 1,
+            selectedmid: [],
             gotoPage: '',
             sortedInputStrings: this.sortInputStrings(props.inputStrings, props.taggedData)
         }
@@ -40,15 +40,15 @@ class Classifier extends React.Component {
         return [...inputStrings].sort((a, b) => {
             const aData = taggedData[a];
             const bData = taggedData[b];
-            
+
             // Check if mid is missing or "na"
             const aHasMid = aData && aData.mid && aData.mid !== "na";
             const bHasMid = bData && bData.mid && bData.mid !== "na";
-            
+
             // If one has mid and the other doesn't, prioritize the one without mid
             if (aHasMid && !bHasMid) return 1;
             if (!aHasMid && bHasMid) return -1;
-            
+
             // Otherwise maintain original order
             return 0;
         });
@@ -89,18 +89,16 @@ class Classifier extends React.Component {
     handleLastPage = () => {
         this.setState({ activePage: this.state.sortedInputStrings.length - 1 });
     }
-    
-    componentDidUpdate(prevProps) {
-        // If inputStrings or taggedData changed, re-sort
-        if (prevProps.inputStrings !== this.props.inputStrings || 
-            prevProps.taggedData !== this.props.taggedData) {
-            this.setState({
-                sortedInputStrings: this.sortInputStrings(
-                    this.props.inputStrings, 
-                    this.props.taggedData
-                )
-            });
-        }
+
+    componentDidMount() {
+        let selectedmidUpdated = [...this.state.selectedmid];
+        this.state.sortedInputStrings.forEach((element, index) => {
+            const suggestions = this.props.taggedData[element];
+            if (suggestions && suggestions.mid && suggestions.mid !== "na") {
+                selectedmidUpdated[index] = suggestions.mid;
+            }
+        });
+        this.setState({ selectedmid: selectedmidUpdated });
     }
 
     handleGotoPageChange = (e) => {
@@ -133,7 +131,7 @@ class Classifier extends React.Component {
                         <Col xs={12} md={6}><Suggestions inputString={this.activeInput}
                             taggedData={this.props.taggedData}
                             members={this.props.members}
-                            callback={this.handleSave} /></Col>
+                            selectionCallback={this.handleSave} /></Col>
                         <Col xs={12} md={6}><CreateMember /></Col>
                     </Row>
                     {(this.state.selectedmid[this.state.activePage] !== undefined) ?
@@ -149,7 +147,22 @@ class Classifier extends React.Component {
                         </Col>
                     </Row>
                 </Container>
-                <div style={{ display: "inline-block", marginTop: 1 + "em" }}>
+                <div style={{
+                    display: "block",
+                    alignItems: "center",
+                    marginTop: "1em",
+                    marginRight: "1em",
+                    marginLeft: "1em"
+                }}>
+                    Identified: {this.state.selectedmid.reduce((x, value) => typeof value !== "undefined" ? x + 1 : x, 0)} of {this.state.sortedInputStrings.length} total
+                </div>
+                <div style={{
+                    display: "inline-block",
+                    alignItems: "center",
+                    marginTop: "1em",
+                    marginRight: "1em",
+                    marginLeft: "1em"
+                }}>
                     <Pagination>
                         <Pagination.First onClick={this.handleFirstPage} />
                         <Pagination.Prev onClick={this.handlePrevPage} />
@@ -190,7 +203,13 @@ class Classifier extends React.Component {
                         <Pagination.Last onClick={this.handleLastPage} />
                     </Pagination>
                 </div>
-                <div style={{ display: "inline-block", marginLeft: "1em" }}>
+                <div style={{
+                    display: "inline-block",
+                    alignItems: "center",
+                    marginTop: "1em",
+                    marginRight: "1em",
+                    marginLeft: "1em"
+                }}>
                     <form onSubmit={this.handleGotoPageSubmit} style={{ display: "flex", alignItems: "center" }}>
                         <span style={{ marginRight: "0.5em" }}>Go to page:</span>
                         <input
