@@ -4,13 +4,6 @@ import Form from 'react-bootstrap/Form'
 var MemberInfo = require("./MemberInfo");
 
 class SuggestedMember extends React.Component {
-    componentDidMount() {
-        // Call the callback when component mounts if this is the first suggestion
-        if (this.props.isFirst) {
-            this.props.callback(this.props.memberInfo);
-        }
-    }
-
     handleRadioSelect = e => {
         this.props.callback(this.props.memberInfo);
     }
@@ -34,12 +27,46 @@ class SuggestedMember extends React.Component {
 }
 
 class Suggestions extends React.Component {
+    constructor(props) {
+        super(props);
+        this.state = {
+            suggestedMembers: []
+        };
+    }
+
+    // Helper method to select the first suggestion
+    selectFirstSuggestion() {
+        const suggestedMembers = this.getSuggestions(this.props.inputString, this.props.members);
+        this.setState({ suggestedMembers });
+        
+        if (suggestedMembers.length > 0 && suggestedMembers[0].mid && this.props.members[suggestedMembers[0].mid]) {
+            this.props.callback(this.props.members[suggestedMembers[0].mid]);
+        }
+    }
+
+    componentDidUpdate(prevProps) {
+        // Check if inputString prop has changed
+        if (prevProps.inputString !== this.props.inputString) {
+            this.selectFirstSuggestion();
+        }
+    }
+
+    componentDidMount() {
+        // Select the first suggestion when the component first mounts
+        this.selectFirstSuggestion();
+    }
+
     getSuggestions(inputString, memberInfo) {
         var suggestionInfos = this.props.taggedData[inputString];
         var suggestedMemberInfos = [];
-        if (suggestionInfos) {
+        if (suggestionInfos && suggestionInfos.mid !== "na") {
             suggestedMemberInfos.push(suggestionInfos);
         }
+        // if (suggestionInfos) {
+        //     // Filter out any items with mid equal to "na"
+        //     var filteredInfos = suggestionInfos.filter(info => info.mid !== "na");
+        //     suggestedMemberInfos = suggestedMemberInfos.concat(filteredInfos);
+        // }
         return suggestedMemberInfos;
     }
 
@@ -65,10 +92,9 @@ class Suggestions extends React.Component {
             }
         }
 
-        var suggestedMembers = this.getSuggestions(this.props.inputString, this.memberList);
         return (
             <div>
-                {suggestedMembers.map((member, i) => {
+                {this.state.suggestedMembers.map((member, i) => {
                     return member.mid ? 
                      <SuggestedMember 
                         key={i} 
@@ -78,7 +104,7 @@ class Suggestions extends React.Component {
                         :""
                     })}
                 <Form.Control as="select" onChange={this.handleSelect}>
-                    {this.memberListArray.map((memberInfo, i) => <option> key={"selmem" + i} {MemberInfo.getMemberInfoAsString(memberInfo)}</option>)}
+                    {this.memberListArray.map((memberInfo, i) => <option key={"selmem" + i}>{MemberInfo.getMemberInfoAsString(memberInfo)}</option>)}
                 </Form.Control>
             </div>
         );

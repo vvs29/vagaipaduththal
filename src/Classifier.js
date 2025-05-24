@@ -27,7 +27,31 @@ class InputString extends React.Component {
 class Classifier extends React.Component {
     constructor(props) {
         super(props)
-        this.state = { activePage: 1, selectedmid: [], gotoPage: '' }
+        this.state = { 
+            activePage: 1, 
+            selectedmid: [], 
+            gotoPage: '',
+            sortedInputStrings: this.sortInputStrings(props.inputStrings, props.taggedData)
+        }
+    }
+
+    // Sort input strings so entries with missing or "na" mid appear first
+    sortInputStrings(inputStrings, taggedData) {
+        return [...inputStrings].sort((a, b) => {
+            const aData = taggedData[a];
+            const bData = taggedData[b];
+            
+            // Check if mid is missing or "na"
+            const aHasMid = aData && aData.mid && aData.mid !== "na";
+            const bHasMid = bData && bData.mid && bData.mid !== "na";
+            
+            // If one has mid and the other doesn't, prioritize the one without mid
+            if (aHasMid && !bHasMid) return 1;
+            if (!aHasMid && bHasMid) return -1;
+            
+            // Otherwise maintain original order
+            return 0;
+        });
     }
 
     getRows() {
@@ -57,13 +81,26 @@ class Classifier extends React.Component {
     }
 
     handleNextPage = () => {
-        if (this.state.activePage < this.props.inputStrings.length - 1) {
+        if (this.state.activePage < this.state.sortedInputStrings.length - 1) {
             this.setState({ activePage: this.state.activePage + 1 });
         }
     }
 
     handleLastPage = () => {
-        this.setState({ activePage: this.props.inputStrings.length - 1 });
+        this.setState({ activePage: this.state.sortedInputStrings.length - 1 });
+    }
+    
+    componentDidUpdate(prevProps) {
+        // If inputStrings or taggedData changed, re-sort
+        if (prevProps.inputStrings !== this.props.inputStrings || 
+            prevProps.taggedData !== this.props.taggedData) {
+            this.setState({
+                sortedInputStrings: this.sortInputStrings(
+                    this.props.inputStrings, 
+                    this.props.taggedData
+                )
+            });
+        }
     }
 
     handleGotoPageChange = (e) => {
@@ -73,7 +110,7 @@ class Classifier extends React.Component {
     handleGotoPageSubmit = (e) => {
         e.preventDefault();
         const pageNum = parseInt(this.state.gotoPage) - 1;
-        if (pageNum >= 0 && pageNum < this.props.inputStrings.length) {
+        if (pageNum >= 0 && pageNum < this.state.sortedInputStrings.length) {
             this.setState({ activePage: pageNum, gotoPage: '' });
         } else {
             alert('Invalid page number');
@@ -84,7 +121,7 @@ class Classifier extends React.Component {
     render() {
         // overview of selections
         // write selections to file (transaction description to memberid map)
-        this.activeInput = this.props.inputStrings[this.state.activePage];
+        this.activeInput = this.state.sortedInputStrings[this.state.activePage];
         var MemberInfo = require("./MemberInfo");
         return (
             <div>
@@ -118,7 +155,7 @@ class Classifier extends React.Component {
                         <Pagination.Prev onClick={this.handlePrevPage} />
 
                         {(() => {
-                            const totalPages = this.props.inputStrings.length;
+                            const totalPages = this.state.sortedInputStrings.length;
                             const currentPage = this.state.activePage;
                             const maxButtons = 5;
 
@@ -159,7 +196,7 @@ class Classifier extends React.Component {
                         <input
                             type="number"
                             min="1"
-                            max={this.props.inputStrings.length}
+                            max={this.state.sortedInputStrings.length}
                             value={this.state.gotoPage}
                             onChange={this.handleGotoPageChange}
                             style={{ width: "60px", marginRight: "0.5em" }}
