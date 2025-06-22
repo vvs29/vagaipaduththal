@@ -6,6 +6,7 @@ import Col from 'react-bootstrap/Col'
 import Card from 'react-bootstrap/Card'
 import Button from 'react-bootstrap/Button'
 import Alert from 'react-bootstrap/Alert'
+import Form from 'react-bootstrap/Form'
 import CreateMember from './CreateMember'
 import Suggestions from './Suggestions'
 import axios from 'axios'
@@ -31,8 +32,9 @@ class Classifier extends React.Component {
     constructor(props) {
         super(props)
         this.state = {
-            activePage: 1,
+            activePage: 0,
             selectedmid: [],
+            transactionTypes: [], // Array to store transaction types
             gotoPage: '',
             sortedInputStrings: this.sortInputStrings(props.inputStrings, props.taggedData),
             isUpdating: false,
@@ -72,6 +74,24 @@ class Classifier extends React.Component {
         temp[this.state.activePage] = e;
         this.setState({ selectedmid: temp });
     }
+    
+    handleTypeChange = (e) => {
+        let temp = [...this.state.transactionTypes];
+        const newType = e.target.value;
+        temp[this.state.activePage] = newType;
+        
+        // If the type is 'INT' (Interest Credit), reset the member_id to null
+        if (newType === 'INT') {
+            let selectedMidTemp = [...this.state.selectedmid];
+            selectedMidTemp[this.state.activePage] = undefined;
+            this.setState({ 
+                transactionTypes: temp,
+                selectedmid: selectedMidTemp
+            });
+        } else {
+            this.setState({ transactionTypes: temp });
+        }
+    }
 
     handlePageChange = e => {
         this.setState({ activePage: parseInt(e.target.id) });
@@ -99,13 +119,22 @@ class Classifier extends React.Component {
 
     componentDidMount() {
         let selectedmidUpdated = [...this.state.selectedmid];
+        let transactionTypesUpdated = [...this.state.transactionTypes];
+        
         this.state.sortedInputStrings.forEach((element, index) => {
             const suggestions = this.props.taggedData[element];
             if (suggestions && suggestions.mid && suggestions.mid !== "na") {
                 selectedmidUpdated[index] = this.props.members[suggestions.mid];
             }
+            
+            // Initialize all transaction types to 'REG' by default
+            transactionTypesUpdated[index] = 'REG';
         });
-        this.setState({ selectedmid: selectedmidUpdated });
+        
+        this.setState({ 
+            selectedmid: selectedmidUpdated,
+            transactionTypes: transactionTypesUpdated
+        });
     }
 
     handleGotoPageChange = (e) => {
@@ -184,6 +213,7 @@ class Classifier extends React.Component {
         this.state.sortedInputStrings.forEach((inputString, index) => {
             const transactionData = this.props.taggedData[inputString];
             const memberInfo = this.state.selectedmid[index];
+            const transactionType = this.state.transactionTypes[index] || 'REG';
             
             // Create a transaction object with fields matching the deposits table
             const transaction = {
@@ -192,7 +222,7 @@ class Classifier extends React.Component {
                 amount: transactionData.transactionAmount,
                 description: transactionData.transactionDescription,
                 date: transactionData.transactionDate,
-                type: 'REG', // Default type since it's required
+                type: transactionType, // Use the selected type for this transaction
                 bank_trans_id: transactionData.transactionId
             };
             
@@ -243,10 +273,50 @@ class Classifier extends React.Component {
                 <div style={{ marginTop: 2 + "em" }} />
                 <Container>
                     <Row>
-                        <Col xs={12} md={6}><Suggestions inputString={this.activeInput}
-                            taggedData={this.props.taggedData}
-                            members={this.props.members}
-                            selectionCallback={this.handleSave} /></Col>
+                        <Col xs={12} md={6}>
+                            <Suggestions 
+                                inputString={this.activeInput}
+                                taggedData={this.props.taggedData}
+                                members={this.props.members}
+                                selectionCallback={this.handleSave} 
+                            />
+                            
+                            {/* Transaction Type Radio Buttons */}
+                            <div className="transaction-type-selector mt-3">
+                                <Form.Group>
+                                    <Form.Label><strong>Transaction Type:</strong></Form.Label>
+                                    <div>
+                                        <Form.Check
+                                            type="radio"
+                                            id="type-reg"
+                                            label="Regular Contribution"
+                                            name="transactionType"
+                                            value="REG"
+                                            checked={this.state.transactionTypes[this.state.activePage] === 'REG'}
+                                            onChange={this.handleTypeChange}
+                                        />
+                                        <Form.Check
+                                            type="radio"
+                                            id="type-onetime"
+                                            label="One time"
+                                            name="transactionType"
+                                            value="ONETIME"
+                                            checked={this.state.transactionTypes[this.state.activePage] === 'ONETIME'}
+                                            onChange={this.handleTypeChange}
+                                        />
+                                        <Form.Check
+                                            type="radio"
+                                            id="type-int"
+                                            label="Interest Credit"
+                                            name="transactionType"
+                                            value="INT"
+                                            checked={this.state.transactionTypes[this.state.activePage] === 'INT'}
+                                            onChange={this.handleTypeChange}
+                                        />
+                                    </div>
+                                </Form.Group>
+                            </div>
+                        </Col>
                         <Col xs={12} md={6}><CreateMember /></Col>
                     </Row>
                     {(this.state.selectedmid[this.state.activePage] !== undefined) ?
