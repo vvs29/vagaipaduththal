@@ -56,7 +56,9 @@ class AppBody extends React.Component {
     state = {
         fileInputStrings: null,
         taggedData: null,
-        members: null
+        members: null,
+        loadingUnidentified: false,
+        loadError: null
     };
 
     readAsTextFile = (file) => {
@@ -91,29 +93,96 @@ class AppBody extends React.Component {
                 axios.get('http://localhost:8081/user')
                     .then((response) => {
                         console.log("getMemberResp:" + JSON.stringify(response));
-                        this.setState({ members: response.data, taggedData: suggestionResp });
+                        this.setState({ 
+                            members: response.data, 
+                            taggedData: suggestionResp,
+                            loadError: null 
+                        });
                     })
                     .catch((error) => {
                         console.log("getMemberErr:" + error);
+                        this.setState({ loadError: "Failed to load member data" });
                     });
 
             })
             .catch((error) => {
                 console.log("suggErr:" + error);
+                this.setState({ loadError: "Failed to load suggestions" });
+            });
+    }
+
+    onFetchUnidentified = () => {
+        this.setState({ loadingUnidentified: true, loadError: null });
+        
+        axios.get('http://localhost:8081/api/unidentified-deposits')
+            .then((response) => {
+                console.log("Unidentified records:", JSON.stringify(response.data));
+                
+                // We have the unidentified records data in response.data
+                // Set it directly to taggedData without calling suggestions API
+                axios.get('http://localhost:8081/user')
+                    .then((memberResponse) => {
+                        console.log("Members:", JSON.stringify(memberResponse.data));
+                        this.setState({ 
+                            members: memberResponse.data, 
+                            taggedData: response.data,
+                            fileInputStrings: null, // Clear any previously loaded file data
+                            loadingUnidentified: false,
+                            loadError: null
+                        });
+                    })
+                    .catch((error) => {
+                        console.log("Error fetching members:", error);
+                        this.setState({ 
+                            loadingUnidentified: false, 
+                            loadError: "Failed to load member data" 
+                        });
+                    });
+            })
+            .catch((error) => {
+                console.log("Error fetching unidentified records:", error);
+                this.setState({ 
+                    loadingUnidentified: false, 
+                    loadError: "Failed to load unidentified entries" 
+                });
             });
     }
 
     render() {
-
         return (
             <div>
-                <input
-                    type="file"
-                    onChange={this.onFileChange}
-                />
-                <button onClick={this.onFileUpload}>
-                    Submit
-                </button>
+                {/* Only show file upload and classify buttons if no data is loaded */}
+                {this.state.taggedData == null && (
+                    <div>
+                        <input
+                            type="file"
+                            onChange={this.onFileChange}
+                        />
+                        <button onClick={this.onFileUpload}>
+                            Submit
+                        </button>
+                        <button 
+                            onClick={this.onFetchUnidentified}
+                            style={{ marginLeft: '10px' }}
+                        >
+                            Classify unidentified records
+                        </button>
+                    </div>
+                )}
+                
+                {this.state.loadError && (
+                    <div style={{ 
+                        color: 'red', 
+                        backgroundColor: '#ffeeee', 
+                        padding: '10px', 
+                        margin: '10px 0', 
+                        borderRadius: '5px',
+                        border: '1px solid red'
+                    }}>
+                        Error: {this.state.loadError}
+                    </div>
+                )}
+                
                 {console.log(this.state.fileInputStrings)}
                 {(this.state.taggedData != null) ?
                     <Classifier
