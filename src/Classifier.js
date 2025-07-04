@@ -9,6 +9,7 @@ import Alert from 'react-bootstrap/Alert'
 import Form from 'react-bootstrap/Form'
 import CreateMember from './CreateMember'
 import Suggestions from './Suggestions'
+import PreviewTransactions from './PreviewTransactions'
 import axios from 'axios'
 
 class InputString extends React.Component {
@@ -40,7 +41,8 @@ class Classifier extends React.Component {
             isUpdating: false,
             updateSuccess: false,
             updateError: null,
-            validationError: null
+            validationError: null,
+            showPreview: false // Flag to toggle between classifier and preview modes
         }
     }
 
@@ -176,15 +178,8 @@ class Classifier extends React.Component {
         return null;
     }
 
-    handleUpdateDatabase = () => {
-        // Reset all status states
-        this.setState({ 
-            isUpdating: false, 
-            updateSuccess: false, 
-            updateError: null,
-            validationError: null
-        });
-        
+    // Show preview of all transactions before updating the database
+    handleShowPreview = () => {
         // Validate all transaction data first
         let validationError = null;
         
@@ -194,70 +189,28 @@ class Classifier extends React.Component {
             
             const error = this.validateTransactionData(transactionData, inputString);
             if (error) {
-                validationError = error;
-                break;
+                this.setState({ validationError: error });
+                return;
             }
         }
         
-        if (validationError) {
-            this.setState({ validationError });
-            return;
-        }
-        
-        // Set updating state
-        this.setState({ isUpdating: true });
-
-        // Prepare data for the API call
-        const transactions = [];
-        
-        this.state.sortedInputStrings.forEach((inputString, index) => {
-            const transactionData = this.props.taggedData[inputString];
-            const memberInfo = this.state.selectedmid[index];
-            const transactionType = this.state.transactionTypes[index] || 'REG';
-            
-            // Create a transaction object with fields matching the deposits table
-            const transaction = {
-                // If a member is assigned, use their ID, otherwise set to null
-                member_id: memberInfo ? memberInfo.mid : null,
-                amount: transactionData.transactionAmount,
-                description: transactionData.transactionDescription,
-                date: transactionData.transactionDate,
-                type: transactionType, // Use the selected type for this transaction
-                bank_trans_id: transactionData.transactionId
-            };
-            
-            transactions.push(transaction);
+        // If validation passes, show the preview
+        this.setState({ 
+            showPreview: true,
+            validationError: null
         });
-
-        // Create the final JSON structure to send to the backend
-        const requestData = {
-            transactions: transactions
-        };
-
-        console.log('Sending transaction data to backend:', requestData);
-
-        // Make API call to the backend
-        axios.post('http://localhost:8081/api/update-deposits', requestData)
-        .then(response => {
-            console.log('Database updated successfully:', response.data);
-            this.setState({ 
-                isUpdating: false, 
-                updateSuccess: true,
-                updateError: null
-            });
-            
-            // Hide success message after 5 seconds
-            setTimeout(() => {
-                this.setState({ updateSuccess: false });
-            }, 5000);
-        })
-        .catch(error => {
-            console.error('Error updating database:', error);
-            this.setState({ 
-                isUpdating: false,
-                updateSuccess: false,
-                updateError: error.response?.data?.message || 'An unknown error occurred'
-            });
+    }
+    
+    // Go back to classifier mode from preview
+    handleBackToClassifier = () => {
+        this.setState({ showPreview: false });
+    }
+    
+    // Handle edit transaction from preview mode
+    handleEditTransaction = (index) => {
+        this.setState({ 
+            showPreview: false,
+            activePage: index
         });
     }
 
@@ -266,6 +219,22 @@ class Classifier extends React.Component {
         // write selections to file (transaction description to memberid map)
         this.activeInput = this.state.sortedInputStrings[this.state.activePage];
         var MemberInfo = require("./MemberInfo");
+        
+        // If in preview mode, show the PreviewTransactions component
+        if (this.state.showPreview) {
+            return (
+                <PreviewTransactions 
+                    inputStrings={this.state.sortedInputStrings}
+                    taggedData={this.props.taggedData}
+                    selectedMembers={this.state.selectedmid}
+                    transactionTypes={this.state.transactionTypes}
+                    onBackToClassifier={this.handleBackToClassifier}
+                    onEditTransaction={this.handleEditTransaction}
+                />
+            );
+        }
+        
+        // Otherwise show the classifier interface
         return (
             <div>
                 <div style={{ marginTop: 1 + "em" }} />
@@ -342,25 +311,12 @@ class Classifier extends React.Component {
                     Identified: {this.state.selectedmid.reduce((x, value) => typeof value !== "undefined" ? x + 1 : x, 0)} of {this.state.sortedInputStrings.length} total
                     <div style={{ marginTop: "1em" }}>
                         <Button 
-                            variant="success" 
+                            variant="primary" 
                             size="lg" 
-                            onClick={this.handleUpdateDatabase}
-                            disabled={this.state.isUpdating}
+                            onClick={this.handleShowPreview}
                         >
-                            {this.state.isUpdating ? 'Updating...' : 'Update Database with Transaction Details'}
+                            Preview Before Update
                         </Button>
-                        
-                        {this.state.updateSuccess && 
-                            <Alert variant="success" className="mt-2">
-                                Database updated successfully!
-                            </Alert>
-                        }
-                        
-                        {this.state.updateError && 
-                            <Alert variant="danger" className="mt-2">
-                                Error updating database: {this.state.updateError}
-                            </Alert>
-                        }
                         
                         {this.state.validationError && 
                             <Alert variant="warning" className="mt-2">
